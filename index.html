@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title>Пространственная автокорреляция</title>
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/simple.css" id="theme" />
+    <link rel="stylesheet" href="plugin/highlight/monokai.css" />
+	<link rel="stylesheet" href="css/layout.css" />
+	<link rel="stylesheet" href="plugin/customcontrols/style.css">
+
+	<link rel="stylesheet" href="plugin/reveal-pointer/pointer.css" />
+
+
+    <script defer src="dist/fontawesome/all.min.js"></script>
+
+	<script type="text/javascript">
+		var forgetPop = true;
+		function onPopState(event) {
+			if(forgetPop){
+				forgetPop = false;
+			} else {
+				parent.postMessage(event.target.location.href, "app://obsidian.md");
+			}
+        }
+		window.onpopstate = onPopState;
+		window.onmessage = event => {
+			if(event.data == "reload"){
+				window.document.location.reload();
+			}
+			forgetPop = true;
+		}
+
+		function fitElements(){
+			const itemsToFit = document.getElementsByClassName('fitText');
+			for (const item in itemsToFit) {
+				if (Object.hasOwnProperty.call(itemsToFit, item)) {
+					var element = itemsToFit[item];
+					fitElement(element,1, 1000);
+					element.classList.remove('fitText');
+				}
+			}
+		}
+
+		function fitElement(element, start, end){
+
+			let size = (end + start) / 2;
+			element.style.fontSize = `${size}px`;
+
+			if(Math.abs(start - end) < 1){
+				while(element.scrollHeight > element.offsetHeight){
+					size--;
+					element.style.fontSize = `${size}px`;
+				}
+				return;
+			}
+
+			if(element.scrollHeight > element.offsetHeight){
+				fitElement(element, start, size);
+			} else {
+				fitElement(element, size, end);
+			}		
+		}
+
+
+		document.onreadystatechange = () => {
+			fitElements();
+			if (document.readyState === 'complete') {
+				if (window.location.href.indexOf("?export") != -1){
+					parent.postMessage(event.target.location.href, "app://obsidian.md");
+				}
+				if (window.location.href.indexOf("print-pdf") != -1){
+					let stateCheck = setInterval(() => {
+						clearInterval(stateCheck);
+						window.print();
+					}, 250);
+				}
+			}
+	};
+
+
+        </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"><!-- .slide: class="drop" template="tpl-con-title" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+# Пространственная автокорреляция<!-- .element: style="font-size: 50px" -->
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+***Пространственный лаг*** с математической точки зрения является произведением матрицы весов и вектора исследуемой переменной, фактически же он показывает *поведение переменной в конкретной точке с учетом ее соседей*.
+
+`$Y_{sl}=WY$` или `$y_{sl-1}=\sum_{j} \: w_{ij}y_j$`
+
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 0%; height: 100%; width: 100%; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-evenly" align="left">
+
+<div class="block">
+
+Если <mark style="background: #ADCCFFA6;">матрица весов бинарна</mark>, то пространственный лаг - это просто **сумма соседних значений**.
+
+Если <mark style="background: #ADCCFFA6;">матрица весов стандартизована</mark> (значения весов `$w_{ij}$` приведены в интервал от 0 до 1), то пространственный лаг становится **локальным средним**, то есть средним значением переменной в окрестностях конкретного объекта. Это и позволяет рассчитывать пространственную автокорреляцию.
+</div>
+
+ <!-- .element: style="font-size: 30px" -->
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<img src="Pasted image 20250325102059.png" alt="" style="object-fit: scale-down">
+
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+Пространственный лаг играет важную роль в количественной оценке пространственной автокорреляции.
+
+С его помощью мы можем начать <mark style="background: #ADCCFFA6;">связывать поведение переменной в данном месте с ее поведением в ближайшем окружении</mark>.
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="block">
+
+Даже, если в исследовании не используется пространство в географическом значении, то часто оно используется опосредованно (например, распространение технологий, существующие сети связей между предприятиями или странами), поэтому применение пространственного лага может быть очень широким.
+
+Фактически это похоже на временные авторегрессионные модели, но проблема пространственного лага в том, что он не так однозначен из-за различных методов расчета пространственных весов.
+</div>
+
+ <!-- .element: style="font-size: 30px" -->
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+## Пространственная автокорреляция<!-- .element: style="font-size: 40px" -->
+
+<div class="block">
+
+Пространственная автокорреляция - это связь наблюдаемых в различных местах значений.
+
+> Пространственная автокорреляция основана на том, что существует связь между значениями близко расположенных наблюдениями.
+
+То есть пространственная автокорреляция связывает значение переменной со значениями той же переменной, но уже в другой точке пространства.
+</div>
+
+ <!-- .element: style="font-size: 30px" -->
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 0%; height: 50%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+<div class="block">
+
+Пространственная автокорреляция может быть _**положительной и отрицательной**_. 
+
+При положительной пространственной автокорреляции близкие значения располагаются рядом друг с другом, тогда как значительно отличающиеся разбросаны на большое расстояние.
+
+В случае отрицательной пространственной автокорреляции близкие значения рассматриваемой переменной расположены на удалении друг от друга.
+</div>
+
+ <!-- .element: style="font-size: 20px" -->
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 40%; height: 50%; width: 100%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="Снимок экрана 2025-03-25 в 11.01.04.png" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 70%; height: 50%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+<div class="block">
+
+https://www.paulamoraga.com/book-spatial/spatial-autocorrelation.html
+</div>
+
+ <!-- .element: style="font-size: 10px" -->
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<img src="Pasted image 20250325110023.png" alt="" style="object-fit: scale-down">
+
+
+<div class="" style="position: absolute; left: 0%; top: 70%; height: 50%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+<div class="block">
+
+https://mgimond.github.io/Spatial/spatial-autocorrelation.html
+</div>
+
+ <!-- .element: style="font-size: 10px" -->
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="block">
+
+## Индекс Морана `$I$` (глобальный)
+</div>
+
+ <!-- .element: style="font-size: 30px" -->
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+`$I=\dfrac{n \sum_i \sum_j w_{ij}(Y_i-\bar Y)(Y_j-\bar Y)}{(\sum_{j \neq i}w_{ij})\sum_i(Y_i-\bar Y)^2}$`
+<div class="block">
+
+где `$n$` - количество наблюдений/объектов;
+`$Y_i$` - значение показателя для объекта `$i$`, `$\bar Y$` - среднее значение показателя, `$w_{ij}$` - матрица пространственных весов.
+</div>
+
+ <!-- .element: style="font-size: 30px" -->
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+
+<div class="" style="position: absolute; left: 0%; top: -25%; height: 100%; width: 90%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+<div class="block">
+
+Как правило, значения индекса Морана находятся в диапазоне от -1 до +1 (как стандартный коэффициент корреляции).
+
+Индекс Морана можно интерпретировать графически с помощью графика Морана (Moran plot). На этом графике по оси X откладываются значения переменной, а по оси Y - ее пространственный лаг.
+</div>
+
+ <!-- .element: style="font-size: 25px" -->
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 35%; height: 60%; width: 60%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="Pasted image 20250325111646.png" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="block">
+
+На полученном графике линия отображает <mark style="background: #ADCCFFA6;">связь между самой переменной и ее пространственным лагом (то есть окружением)</mark>.
+
+В данном случае, судя по всему, имеется положительная пространственная автокорреляция, то есть объекты c высокими значениями количества населения будут расположены ближе к объектам, где значение количества населения тоже достаточно высоко.
+
+<div class="callout callout-color-default">
+<div class="callout-title">
+<div class="callout-icon">
+
+<i class="fas fa-pencil-alt" ></i>
+
+
+</div>
+<div class="callout-title-inner">
+
+Величина индекса Морана будет равна тангесу угла наклона (коэффициенту a в линейном уравнении `$y=ax+b$`) полученной на графике линии.
+
+</div>
+</div>
+<div class="callout-content">
+
+</div>
+</div>
+</div>
+
+ <!-- .element: style="font-size: 30px" -->
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="block">
+
+Важным аспектом визуализации на диаграмме рассеяния Морана является <mark style="background: #ABF7F7A6;">классификация характера пространственной автокорреляции на четыре категории</mark>. Поскольку график центрирован на среднем значении (нулевом), то все точки справа от среднего значения имеют `$z_i>0$`, а все точки слева - `$z_i<0$`.
+
+Мы называем эти значения соответственно высоким и низким, в ограниченном смысле - выше или ниже среднего. Аналогичным образом мы можем классифицировать значения пространственного лага выше и ниже среднего как высокие и низкие.
+</div>
+
+ <!-- .element: style="font-size: 30px" -->
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="block">
+
+Правый верхний квадрант и левый нижний квадрант соответствуют положительной пространственной автокорреляции (близкие значения в соседних точках). Мы называем их соответственно high-high и low-low квадранты пространственной автокорреляции. 
+
+Напротив, правый нижний и левый верхний квадранты соответствуют отрицательной пространственной автокорреляции (несхожие значения в соседних точках). Мы называем их соответственно high low и low high квадрантами пространственной автокорреляции.
+</div>
+
+ <!-- .element: style="font-size: 30px" -->
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="block">
+
+Процесс тестирования на наличие пространственной автокорреляции по этапам:
+<div class="block">
+
+1. нулевая и альтернативная гипотезы `$H_0: I = E[I]$` (пространственная случайность) и `$H_1: I \neq E[I]$` (наличие пространственной автокорреляции);</div>
+
+<!-- .element: class="fragment" data-fragment-index="1" -->
+<div class="block">
+
+2. установление уровня значимости `$\alpha$` (как правило, стандартным уровнем значимости является `$\alpha=0,05$`);</div>
+
+<!-- .element: class="fragment" data-fragment-index="2" -->
+<div class="block">
+
+3. вычисление статистики тестирования `$z = \frac{I-E(I)}{Var(I)^{1/2}}$`, где `$Var[I] = \frac{n^2(n-1)S_1 - n(n-1)S_2 - 2 S_0^2}{(n+1)(n-1)S_0^2}$` , `$S_0 = \sum_{i \neq j} w_{ij},\ S_1= \frac{1}{2}\sum_{i\neq j} (w_{ij}+w_{ji})^2$` и  `$S_2 = \sum_k \left(\sum_j w_{kj}+\sum_i w_{ik}\right)^2$`;</div>
+
+<!-- .element: class="fragment" data-fragment-index="3" -->
+<div class="block">
+
+4. определить `$p$` - значение (либо с использованием нормального распределения, либо с использованием рандомизации по методу Монте-Карло);</div>
+
+<!-- .element: class="fragment" data-fragment-index="4" -->
+<div class="block">
+
+5. определение наличия (`$p$` - значение `$< \alpha$`) или отсутствия (`$p$` - значение `$\geq \alpha$`) пространственной автокорреляции.</div>
+
+<!-- .element: class="fragment" data-fragment-index="5" -->
+</div>
+
+ <!-- .element: style="font-size: 22px" -->
+
+<div class="block">
+
+https://www.paulamoraga.com/book-spatial/spatial-autocorrelation.html
+</div>
+
+ <!-- .element: style="font-size: 10px" -->
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 0%; height: 100%; width: 100%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<div class="block">
+
+| P-значение статистически не значимо.                          | Вы не можете отклонить нулевую гипотезу. То есть наблюдаемое пространственное распределение значений атрибутов объектов – результат случайных пространственных процессов. Наблюдаемая пространственная закономерность атрибутивных значений объектов может быть одним из возможных вариантов абсолютной пространственной случайности.                                                                                                                                                                           |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P-значение статистически значимо, и z-оценка – положительная. | Вы можете отклонить нулевую гипотезу. Пространственное распределение высоких/низких значений в наборе данных соответствует более выраженной пространственной кластеризации, чем наблюдалось бы, если эти пространственные закономерности были бы действительно случайными.                                                                                                                                                                                                                                      |
+| P-значение статистически не значимо, и z-оценка – негативная. | Вы можете отклонить нулевую гипотезу. Пространственное распределение высоких и низких значений в наборе данных более равномерно, чем если бы эти пространственные закономерности были бы действительно случайными. Равномерно распределенная пространственная модель часто отражает некоторый тип конкурентного процесса: объект с высокими значениями располагается рядом с другими объектами с высокими значениями, объект с низкими значениями располагается рядом с другими объектами с низкими значениями. |
+
+</div>
+
+ <!-- .element: style="font-size: 20px" -->
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 90%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+<div class="block">
+
+https://pro.arcgis.com/ru/pro-app/latest/tool-reference/spatial-statistics/h-how-spatial-autocorrelation-moran-s-i-spatial-st.htm
+</div>
+
+ <!-- .element: style="font-size: 10px" -->
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 10%; height: 70%; width: 100%; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-evenly" align="left">
+
+<img src="Pasted image 20250325113009.png" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="" style="position: absolute; left: 30%; top: 20%; height: 70%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+<img src="Pasted image 20250325113021.png" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<img src="Pasted image 20250325113107.png" alt="" style="object-fit: scale-down">
+
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+С содержательной точки зрения, пространственная автокорреляция <mark style="background: #ADCCFFA6;">может отражать действие процессов, порождающих связь между значениями в близлежащих точках</mark>.
+
+Это может представлять собой побочные эффекты, когда результаты в одном месте влияют на другие места, или может свидетельствовать о "заражении", когда результаты в одном месте причинно влияют на другие места.
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="block">
+
+## Индекс `$C$` Гири</div>
+
+<!-- .element: style="font-size: 30px" -->
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+$C = \dfrac{(n-1)}
+          {2 \sum_i \sum_j w_{ij}} 
+    \dfrac{\sum_i \sum_j w_{ij} (y_i - y_{j})^2}
+          {\sum_i (y_i - \bar{y})^2}$
+
+<div class="block">
+
+где `$n$` - количество наблюдений/объектов;
+`$y_i$` - значение показателя для объекта `$i$`, `$y_j$` - значение показателя для объекта `$j$`, `$\bar y$` - среднее значение показателя, `$w_{ij}$` - матрица пространственных весов.
+</div>
+
+ <!-- .element: style="font-size: 30px" -->
+
+<div class="block">
+
+https://geographicdata.science/book/notebooks/06_spatial_autocorrelation.html
+</div>
+
+ <!-- .element: style="font-size: 10px" -->
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+Значения индекса Гири изменяются в диапазоне от 0 до 2.
+
+При этом значение 1 указывает на отсутствие пространственной автокорреляции, значения меньше 1 - на положительную автокорреляцию, а больше 1 - на отрицательную.
+
+Индекс Гири <mark style="background: #ADCCFFA6;">более чувствителен к различиям в небольших районах</mark>.
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="block">
+
+## Общая `$G$`-статистика или индекс Гетиса-Орда</div>
+
+ <!-- .element: style="font-size: 25px" -->
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+$G(d) = \dfrac{ \sum_i \sum_j w_{ij}(d) \, y_i \, y_j }
+             { \sum_i \sum_j y_i \, y_j }$
+
+где `$d$` - расстояние, в пределах которого находятся все пары наблюдений, `$\sum_j w_{ij}(d)$` - сумма весов для пар `$j \neq i$` для расстояния `$d$`.
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+Этот индекс используется для выяснения, <mark style="background: #ADCCFFA6;">вызвана ли обнаруженная положительная пространственная автокорреляция кластеризацией высоких или низких значений</mark>.
+
+Оценка статистической значимости здесь осуществляется так же, как для индекса Морана.
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="block">
+
+`$G$`-статистика <mark style="background: #ADCCFFA6;">имеет значение только при положительной пространственной автокорреляции</mark>, что позволяет обнаружить наличие кластеров. Поэтому этот показатель является скорее ***индексом пространственной ассоциации или индексом положительной пространственной автокорреляции***.
+
+Если общая `$G$`-статистика является статистически не значимой, это не говорит о пространственной случайности исследуемого набора данных. 
+</div>
+
+ <!-- .element: style="font-size: 30px" -->
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 0%; top: -40%; height: 100%; width: 100%; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-evenly" align="left">
+
+## Инкрементальная пространственная автокорреляция<!-- .element: style="font-size: 30px" -->
+</div>
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: -20%; height: 100%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+<div class="block">
+
+Используется для проверки наличия пространственной автокорреляции в пределах различных диапазонов расстояния для оценки масштаба анализа.
+
+Основана на вычислении индекса Морана для последовательно увеличивающегося расстояния.
+
+Кроме значений индекса Морана на подобных графиках могут отображаться `$z$` оценки.
+
+Наличие нескольких пиков на графике может говорить о различных процессах, протекающих на разных масштабах
+</div>
+
+ <!-- .element: style="font-size: 20px" -->
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 40%; height: 60%; width: 60%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+<img src="Pasted image 20250325125939.png" alt="" style="object-fit: scale-down">
+
+</div>
+
+
+<div class="" style="position: absolute; left: 55%; top: 50%; height: 50%; width: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+<img src="Pasted image 20250325141305.png" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+Несмотря на свою важность, глобальные меры пространственной автокорреляции являются **<mark style="background: #FF5582A6;">статистикой "всей карты"</mark>**. 
+
+Они дают единую сводку по всему набору данных.
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+## Локальная пространственная автокорреляция<!-- .element: style="font-size: 40px" -->
+
+<div class="block">
+
+Для того, чтобы более подробно понять как объекты сгруппированы в кластеры, каковы эти кластеры и есть ли какие-либо выбросы в распределении, используются <mark style="background: #ADCCFFA6;">локальные метрики пространственной автокорреляции - local indicators of spatial association (LISA)</mark>.
+
+В определенном смысле эти локальные индикаторы порождены декомпозицией глобального индикатора.
+</div>
+
+ <!-- .element: style="font-size: 30px" -->
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+## Локальный индекс Морана I<!-- .element: style="font-size: 40px" -->
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+`$I_i = \frac{n (Y_i - \bar Y)}{\sum_j (Y_j - \bar Y)^2} \sum_j w_{ij}(Y_j - \bar Y)$`
+<div class="block">
+
+При этом глобальный индекс Морана может быть выражен через локальные метрики:
+</div>
+
+ <!-- .element: style="font-size: 25px" -->
+
+`$I = \frac{1}{\sum_{i \neq j} w_{ij}}\sum_i I_i$`
+<div class="block">
+
+https://www.paulamoraga.com/book-spatial/spatial-autocorrelation.html
+</div>
+
+ <!-- .element: style="font-size: 10px" -->
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="block">
+
+Как правило, значения LISAs используются для <mark style="background: #D2B3FFA6;">**поиска локаций, которые либо сильно связаны с окружением, либо наоборот**</mark>.
+
+Высокое значение локального показателя может свидетельствовать о том, что этот объект находится в окружении других объектов с близким значением исследуемого показателя.
+
+Низкие значения локальных индикаторов говорят о том, что данный объект окружен другими объектами с сильно отличающимся значением показателя, то есть это объект непохожий на своих соседей.
+
+Для оценки статистической значимости для каждого из объектов рассчитываются `$p$` - значения, которые показывают вероятность пространственной случайности. Эти значения могут быть рассчитаны на основе симуляции с рандомизацией. 
+</div>
+
+ <!-- .element: style="font-size: 25px" -->
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 0%; height: 60%; width: 60%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="Pasted image 20250325115506.png" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 30%; height: 100%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+<div class="block">
+
+На графике хорошо видно, что все наблюдения можно разбить на четыре квадранта:
+- квадрант  с высоким значением переменной и высоким значением пространственного лага (HH-квадрант);
+- квадрант с низким значением переменной и низким значением пространственного лага (LL-квадрант);
+- квадрант с высоким значением переменной и низким значением пространственного лага (HL-квадрант);
+- квадрант с низким значением переменной и высоким значением пространственного лага (LH-квадрант).
+</div>
+
+ <!-- .element: style="font-size: 20px" -->
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="block">
+
+Локальные индикаторы помогают нам <mark style="background: #ADCCFFA6;">выявить области необычной концентрации значений</mark>.
+
+Кластеры будут представлять ***значения одного типа, появление которых маловероятно в предположении пространственной случайности***. 
+
+Таким образом, чтобы узнать, принадлежит ли каждая точка к статистически значимому кластеру того или иного вида, необходимо сравнить ее с тем, что можно было бы ожидать, если бы данные распределялись по пространству совершенно случайным образом.
+</div>
+
+ <!-- .element: style="font-size: 30px" -->
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 0%; height: 55%; width: 100%; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-evenly" align="left">
+
+<img src="Pasted image 20250325115650.png" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="" style="position: absolute; left: 2%; top: 50%; height: 50%; width: 100%; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-evenly" align="left">
+
+<div class="block">
+
+Правый хвост распределения показывает положительные значения индексов локальной пространственной автокорреляции, то есть объектов с высокими значениями переменной, окруженных другими объектами с высокими значениями (HH кластеры) или наоборот объектов с низкими значениями, окруженных объектами с низкими значениями (LL кластеры). Сами по себе индексы не могут показать нам, какой из двух случаев мы получим.
+</div>
+
+ <!-- .element: style="font-size: 30px" -->
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 0%; height: 90%; width: 100%; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-evenly" align="left">
+
+<img src="Pasted image 20250325121037.png" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 0%; height: 30%; width: 85%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+<div class="block">
+
+## Индексы Гетиса-Орда `$G_i$` и `$G_i^*$` (анализ горячих точек)
+</div>
+
+ <!-- .element: style="font-size: 20px" -->
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 10%; height: 100%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+<div class="block">
+
+$G(d) = \dfrac{ \sum_j w_{ij}(d) \, y_j }
+             { \sum_{j=1}y_j } , j \neq i$
+
+$G^*(d) = \dfrac{ \sum_j w_{ij}(d) \, y_j }
+             { \sum_{j=1}y_j }$
+
+где `$d$` - расстояние, в пределах которого находятся все пары наблюдений, `$\sum_j w_{ij}(d)$` - сумма весов для пар `$j \neq i$` для расстояния `$d$`.
+</div>
+
+ <!-- .element: style="font-size: 30px" -->
+</div>
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section><section  data-markdown><script type="text/template"><!-- .slide: class="drop" -->
+<div class="" style="position: absolute; left: 0px; top: 0px; height: 700px; width: 960px; min-height: 700px; display: flex; flex-direction: column; align-items: center; justify-content: center" absolute="true">
+
+<div class="" style="position: absolute; left: 80%; top: 0%; height: 10%; width: 20%; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-evenly" align="right">
+
+<img src="logo_osnovnoy_russkiy_chernyy.jpg" alt="" style="object-fit: scale-down">
+
+</div>
+
+Как и для индекса Морана осуществляется расчет `$z$` оценки, значение которой говорит о наличии "горячих" или "холодных" точек:
+- высокое положительное значение `$z$` оценки свидетельствует о наличии "горячих" точек, то есть о группировке высоких значений;
+- низкое отрицательной значение `$z$` оценки напротив свидетельствует о наличии "холодных" точек, то есть о группировке низких значений.
+
+<div class="" style="position: absolute; left: 0%; top: 95%; height: 5%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center" >
+
+© 2025 Балтыжакова Т.И.<!-- .element: style="font-size: 10px" -->
+</div>
+</div></script></section></div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+	<script src="plugin/mermaid/mermaid.js"></script>
+	<script src="plugin/chart/chart.min.js"></script>
+	<script src="plugin/chart/plugin.js"></script>
+	<script src="plugin/customcontrols/plugin.js"></script>
+	<script src="plugin/reveal-pointer/pointer.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+	  function isLight(color) {
+		let hex = color.replace('#', '');
+
+		// convert #fff => #ffffff
+		if(hex.length == 3){
+			hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`;
+		}
+
+		const c_r = parseInt(hex.substr(0, 2), 16);
+		const c_g = parseInt(hex.substr(2, 2), 16);
+		const c_b = parseInt(hex.substr(4, 2), 16);
+		const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+		return brightness > 155;
+	}
+
+	var bgColor = getComputedStyle(document.documentElement).getPropertyValue('--r-background-color').trim();
+	var isLight = isLight(bgColor);
+
+	if(isLight){
+		document.body.classList.add('has-light-background');
+	} else {
+		document.body.classList.add('has-dark-background');
+	}
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath.MathJax3,
+		  RevealMermaid,
+		  RevealChart,
+		  RevealCustomControls,
+	      RevealPointer,
+        ],
+
+
+    	allottedTime: 120 * 1000,
+
+		mathjax3: {
+			mathjax: 'plugin/math/mathjax/tex-mml-chtml.js',
+		},
+		markdown: {
+		  gfm: true,
+		  mangle: true,
+		  pedantic: false,
+		  smartLists: false,
+		  smartypants: false,
+		},
+
+		mermaid: {
+			theme: isLight ? 'default' : 'dark',
+		},
+
+		customcontrols: {
+			controls: [
+			]
+		},
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"width":960,"height":700,"margin":0.04,"controls":true,"progress":true,"slideNumber":true,"transition":"none","transitionSpeed":"default"}, queryOptions);
+    </script>
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+
+  <!-- created with Advanced Slides -->
+</html>
